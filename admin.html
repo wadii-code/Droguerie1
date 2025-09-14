@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - La Droguerie</title>
+    <link rel="stylesheet" href="admin-styles.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-100">
+    
+    <div id="login-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden">
+        <div class="bg-white p-8 rounded-lg shadow-lg max-w-md w-full mx-4">
+            <h2 class="text-2xl font-bold mb-4 text-center">Espace Administrateur</h2>
+            <form id="login-form">
+                <div class="mb-4">
+                    <label for="password" class="block text-sm font-medium text-gray-700 mb-2">Mot de passe</label>
+                    <input type="password" id="password" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600" required>
+                </div>
+                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-md transition duration-300">
+                    Se connecter
+                </button>
+            </form>
+            <p class="text-xs text-gray-500 text-center mt-2">Demo: admin123</p>
+        </div>
+    </div>
+
+    
+    <div class="sidebar bg-gray-800 text-white hidden" id="main-content">
+        <div class="p-4 border-b border-gray-700">
+            <h1 class="text-xl font-bold">La<span class="text-green-400">Droguerie</span></h1>
+            <p class="text-sm text-gray-400">Espace Administrateur</p>
+        </div>
+        
+        <nav class="mt-6">
+            <a href="#products" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-700">
+                <i class="fas fa-box mr-3"></i>
+                Gestion des produits
+            </a>
+            <a href="#orders" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-700">
+                <i class="fas fa-clipboard-list mr-3"></i>
+                Gestion des clients
+            </a>
+            <a href="#clients" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-700">
+                <i class="fas fa-users mr-3"></i>
+                Fiches clients
+            </a>
+            <a href="#settings" class="flex items-center px-4 py-3 text-gray-300 hover:bg-gray-700">
+                <i class="fas fa-cog mr-3"></i>
+                Paramètres
+            </a>
+        </nav>
+        <!-- GESTION DES CLIENTS (ORDERS) SECTION -->
+        <section id="orders" class="hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">Gestion des clients</h2>
+            </div>
+            <div class="bg-white rounded-lg shadow overflow-hidden">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Produits achetés</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Montant total</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date d'achat</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200" id="orders-table-body">
+                        <!-- Orders will be dynamically inserted here -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+        
+        <div class="absolute bottom-0 w-full p-4 border-t border-gray-700">
+            <a href="../frontend/index.html" class="flex items-center text-gray-300 hover:text-white">
+                <i class="fas fa-sign-out-alt mr-2"></i>
+                Retour au site
+            </a>
+        </div>
+    </div>
+
+    
+    <div class="main-content p-6 hidden" id="main-area">
+        
+        <section id="products">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">Gestion des produits</h2>
+                <button id="add-product-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center pulse">
+                    <i class="fas fa-plus mr-2"></i> Ajouter un produit
+                </button>
+            </div>
+
+            
+            <div class="bg-white p-4 rounded-lg shadow mb-6">
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="flex-1">
+                        <input type="text" id="product-search" placeholder="Rechercher un produit..." class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600">
+                    </div>
+                    <div>
+                        <select id="category-filter" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600">
+                            <option value="">Toutes les catégories</option>
+                            <option value="peinture">Peinture</option>
+                            <option value="nettoyage">Nettoyage</option>
+                            <option value="quincaillerie">Quincaillerie</option>
+                            <option value="outillage">Outillage</option>
+                            <option value="jardinage">Jardinage</option>
+                        </select>
+                    </div>
+                    <div>
+                        <select id="status-filter" class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600">
+                            <option value="">Tous les statuts</option>
+                            <option value="active">Actif</option>
+                            <option value="inactive">Inactif</option>
+                            <option value="promo">En promotion</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            
+            <div class="bg-white rounded-lg shadow overflow-hidden">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Produit</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Catégorie</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Prix</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Stock</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Statut</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200" id="products-table-body">
+                        <!-- Products will be dynamically inserted here -->
+                    </tbody>
+                </table>
+            </div>
+
+            
+            <div class="mt-6 flex justify-between items-center">
+                <div class="text-sm text-gray-700">
+                    Affichage de <span id="items-count">1</span> à <span id="items-total">10</span> sur <span id="total-products">0</span> produits
+                </div>
+                <div class="flex space-x-2">
+                    <button id="prev-page" class="px-3 py-1 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50 disabled:opacity-50" disabled>Précédent</button>
+                    <span id="page-info" class="px-3 py-1 text-gray-700">Page 1</span>
+                    <button id="next-page" class="px-3 py-1 border border-gray-300 rounded-md bg-white text-gray-700 hover:bg-gray-50">Suivant</button>
+                </div>
+            </div>
+        </section>
+
+    <!-- ...existing code... -->
+
+        
+        <section id="clients" class="hidden">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold">Gestion des clients</h2>
+                <button id="add-client-btn" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded flex items-center pulse">
+                    <i class="fas fa-user-plus mr-2"></i> Ajouter un client
+                </button>
+            </div>
+
+            <div class="bg-white p-4 rounded-lg shadow mb-6">
+                <input type="text" id="client-search" placeholder="Rechercher un client..." class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600">
+            </div>
+
+            <div class="bg-white rounded-lg shadow overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nom</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Téléphone</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nb. Commandes</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total Dépensé</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dernière activité</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="clients-table-body" class="bg-white divide-y divide-gray-200">
+                        <!-- Clients will be dynamically inserted here -->
+                    </tbody>
+                </table>
+            </div>
+
+            
+            <div id="client-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+                <div class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full mx-4 scale-in">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-xl font-bold" id="client-modal-title">Ajouter un client</h3>
+                        <button id="close-client-modal" class="text-gray-500 hover:text-gray-700">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <form id="client-form" class="space-y-4">
+                        <input type="hidden" id="client-id">
+                        <div>
+                            <label for="client-name" class="block text-sm font-medium text-gray-700 mb-1">Nom</label>
+                            <input type="text" id="client-name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600" required>
+                        </div>
+                        <div>
+                            <label for="client-email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                            <input type="email" id="client-email" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600" required>
+                        </div>
+                        <div>
+                            <label for="client-phone" class="block text-sm font-medium text-gray-700 mb-1">Téléphone</label>
+                            <input type="tel" id="client-phone" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600">
+                        </div>
+                        <div class="flex justify-end space-x-3 pt-4">
+                            <button type="button" id="cancel-client-form" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">Annuler</button>
+                            <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md">Enregistrer</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </section>
+    <!-- ...existing code... -->
+        <section id="settings" class="hidden">
+            <h2 class="text-2xl font-bold mb-6">Paramètres</h2>
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-lg shadow max-w-md mx-auto">
+                <h3 class="text-lg font-semibold mb-4">Thème de l'application</h3>
+                <div class="flex items-center space-x-6">
+                    <label class="flex items-center cursor-pointer">
+                        <input type="radio" name="theme" value="light" id="theme-light" class="form-radio mr-2">
+                        <span>🌞 Clair</span>
+                    </label>
+                    <label class="flex items-center cursor-pointer">
+                        <input type="radio" name="theme" value="dark" id="theme-dark" class="form-radio mr-2">
+                        <span>🌙 Sombre</span>
+                    </label>
+                </div>
+            </div>
+        </section>
+    </div>
+
+        
+    <div id="product-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+        <div class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full mx-4 scale-in">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold" id="modal-title">Ajouter un produit</h3>
+                <button id="close-modal" class="text-gray-500 hover:text-gray-700">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <form id="product-form" class="space-y-4">
+                <input type="hidden" id="product-id">
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="product-name" class="block text-sm font-medium text-gray-700 mb-1">Nom du produit</label>
+                        <input type="text" id="product-name" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600" required>
+                    </div>
+                    
+                    <div>
+                        <label for="product-category" class="block text-sm font-medium text-gray-700 mb-1">Catégorie</label>
+                        <select id="product-category" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600" required>
+                            <option value="">Sélectionner une catégorie</option>
+                            <option value="peinture">Peinture</option>
+                            <option value="nettoyage">Nettoyage</option>
+                            <option value="quincaillerie">Quincaillerie</option>
+                            <option value="outillage">Outillage</option>
+                            <option value="jardinage">Jardinage</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div>
+                    <label for="product-description" class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <textarea id="product-description" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600"></textarea>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label for="product-price" class="block text-sm font-medium text-gray-700 mb-1">Prix (€)</label>
+                        <input type="number" id="product-price" step="0.01" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600" required>
+                    </div>
+                    
+                    <img id="preview-img" class="hidden w-32 h-32 object-cover mt-2 rounded border" alt="Preview">
+                    <div>
+                        <label for="product-stock" class="block text-sm font-medium text-gray-700 mb-1">Stock</label>
+                        <input type="number" id="product-stock" min="0" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600" required>
+                    </div>
+                    
+                    <div>
+                        <label for="product-status" class="block text-sm font-medium text-gray-700 mb-1">Statut</label>
+                        <select id="product-status" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600" required>
+                            <option value="active">Actif</option>
+                            <option value="inactive">Inactif</option>
+                            <option value="promo">En promotion</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Image</label>
+                    <input type="file" id="product-image" accept="image/*" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600">
+                    <input type="text" id="product-image-url" placeholder="Ou URL si pas de fichier" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-600 mt-1">
+                    <img id="preview-img" class="hidden w-32 h-32 object-cover mt-2 rounded border" alt="Preview">
+                </div>
+                
+                <div class="flex justify-end space-x-3 pt-4">
+                    <button type="button" id="cancel-form" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                        Annuler
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md">
+                        Enregistrer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <div id="delete-modal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+        <div class="bg-white p-6 rounded-lg shadow-lg max-w-md w-full mx-4">
+            <div class="text-center">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                    <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
+                </div>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">Confirmer la suppression</h3>
+                <p class="text-sm text-gray-500 mb-6">Êtes-vous sûr de vouloir supprimer ce produit? Cette action est irréversible.</p>
+                
+                <div class="flex justify-center space-x-3">
+                    <button id="cancel-delete" class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">
+                        Annuler
+                    </button>
+                    <button id="confirm-delete" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md">
+                        Supprimer
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="admin-script.js"></script>
+</body>
+</html>
